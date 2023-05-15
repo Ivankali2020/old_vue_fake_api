@@ -1,58 +1,144 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div>
+    <h1 id="name" class="text-white">To Do List</h1>
+    <h3 style="color: red" v-if="error">Write Something Bae</h3>
+    <input
+      type="text"
+      class="form-control d-inline w-25"
+      v-model="test"
+      @keyup.enter="add()"
+    />
+    <button @click="add()" class="btn btn-outline-dark">add</button>
+
+    <div v-if="arr.length">
+      <span>Total {{ arr.length }}</span>
+
+      <span v-if="countCheck == arr.length" class="text-success">
+        AllDone {{ countCheck }}
+      </span>
+      <span v-else-if="countCheck">Check {{ countCheck }} </span>
+
+      <ul
+        v-for="(a, index) in arr"
+        :key="index"
+        class="btn list-group w-25 m-auto"
+      >
+       
+        <li
+          :class="[
+            'list-group-items d-flex justify-content-between text-white',
+            { delete: a.delete },
+          ]"
+        >
+          <input
+            type="checkbox"
+            :id="'check' + a.id"
+            class="form-control-checkbox mr-5"
+            @click="check(a)"
+          />
+          <input
+            type="text"
+            class="form-control w-25 d-inline"
+            v-if="a.edit"
+            @keyup.enter="update(a.id)"
+            v-model="updateText"
+          />
+          <label v-else :for="'check' + a.id" :class="[{ delete: a.checkbox }]">
+            {{ a.name }}
+          </label>
+          <button class="btn btn-warning btn-sm" @click="e(a.id)">edit</button>
+          <button class="btn btn-primary btn-sm" @click="del(a)">delete</button>
+        </li>
+      </ul>
+    </div>
+    <div v-else>no availabel to do lists</div>
+
+    <!-- <New :test="arr"></New> -->
   </div>
 </template>
 
 <script>
+// import New from './New.vue';
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+  // components: { New },
+  name: "HelloWorld",
+  data() {
+    return {
+      error: false,
+      test: "",
+      updateText: "",
+      arr: [],
+      count: 1,
+    };
+  },
+  computed: {
+    countCheck() {
+      return this.arr.filter((el) => el.checkbox === true).length;
+    },
+  },
+  methods: {
+    check(x) {
+      console.log((x.checkbox = !x.checkbox));
+
+      // this.arr = this.arr.map(el=>el.id == x.id ? el.checkbox =true : el.checkbox = false);
+    },
+    add() {
+      if (this.test.length != "") {
+        this.arr.push({
+          checkbox: false,
+          name: this.test,
+          id: this.count,
+          edit: false,
+          delete: false,
+        });
+        this.count++;
+        this.test = "";
+        this.error = false;
+      } else {
+        this.error = true;
+      }
+    },
+
+    del(x) {
+      x.delete = true;
+      // let del = this.arr.filter(el => el.name == x);
+      // del[0].delete = true;
+      // console.log( del[0].delete = true)
+      setTimeout(() => {
+        this.arr = this.arr.filter((el) => el.name != x.name);
+      }, 500);
+    },
+
+    e(id) {
+      this.arr.map((el) => {
+        if (el.id == id) {
+          el.edit = true;
+        }
+      });
+    },
+
+    update(id) {
+      if (this.updateText.length != "") {
+        this.arr.map((el) => {
+          if (el.id == id) {
+            el.name = this.updateText;
+            el.edit = false;
+          }
+        });
+        this.updateText = "";
+        this.error = false;
+      } else {
+        this.error = true;
+      }
+    },
+  },
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+<style  scoped>
+.delete {
+  animation: 0.5s bounce;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+
+
 </style>
